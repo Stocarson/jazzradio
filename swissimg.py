@@ -7,6 +7,9 @@ title = False
 readTitle = False
 readArtist = False
 artistReady = False
+imgurl = ""
+artist = ""
+title = ""
 
 class MyHTMLParser(HTMLParser):
 
@@ -15,10 +18,10 @@ class MyHTMLParser(HTMLParser):
         global readTitle
         global readArtist
         global artistReady
+        global imgurl
         if tag == "img" and attrs[2] == ("height", "50"):
             swiss = "http://www.radioswissjazz.ch"
-            url = swiss + attrs[3][1]
-            print("The image url is '{}'".format(url))
+            imgurl = swiss + attrs[3][1]
             title = True
         if title == True and tag == "span" and attrs[0] == ("class", "titletag"):
             title = False
@@ -30,12 +33,14 @@ class MyHTMLParser(HTMLParser):
         global readTitle
         global readArtist
         global artistReady
+        global title
+        global artist
         if readTitle == True:
-            print("The title is '{}'".format(data))
+            title = data
             readTitle = False 
             readArtist = True
         if artistReady == True:
-            print("The artist is '{}'".format(data))
+            artist = data
             artistReady = False
 
 parser = MyHTMLParser()
@@ -44,3 +49,25 @@ with urlopen("http://www.radioswissjazz.ch/it") as response:
    html = response.read()
 
 parser.feed(html.decode("utf-8"))
+
+def update():
+    parser = MyHTMLParser()
+    with urlopen("http://www.radioswissjazz.ch/it") as response:
+           html = response.read()
+    parser.feed(html.decode("utf-8"))
+
+def getImg():
+    with urlopen(imgurl) as response:
+        image = response.read()
+        return image
+
+def getArtist():
+    return artist
+
+def getTitle():
+    return title
+
+if __name__ == "__main__":
+    update()
+    print('The title is {}'.format(getTitle()))
+    print('The artist is {}'.format(getArtist()))
